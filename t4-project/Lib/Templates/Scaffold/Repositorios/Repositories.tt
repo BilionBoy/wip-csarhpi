@@ -1,0 +1,110 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ output extension=".cs" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Text" #>
+
+<#
+try
+{
+    // CONFIGURAÇÕES DO REPOSITÓRIO
+    string ModelName = "Participante";
+    string DbContextNamespace = "SEJUCEL.Data";
+    string ModelsNamespace = "SEJUCEL.Models";
+
+    // --- 1) DESCOBRIR AUTOMATICAMENTE A RAIZ DO PROJETO (.csproj) ---
+    string ttFilePath = Host.TemplateFile;
+    string current = Path.GetDirectoryName(ttFilePath);
+    string projectRoot = null;
+
+    while (current != null && projectRoot == null)
+    {
+        // procura o .csproj nesta pasta
+        if (Directory.GetFiles(current, "*.csproj").Length > 0)
+            projectRoot = current;
+        else
+            current = Directory.GetParent(current)?.FullName;
+    }
+
+    if (projectRoot == null)
+        throw new Exception("Não foi possível localizar o arquivo .csproj!");
+
+    // --- 2) GARANTIR A PASTA REPOSITORIES ---
+    string repoFolder = Path.Combine(projectRoot, "Repositories");
+    if (!Directory.Exists(repoFolder))
+        Directory.CreateDirectory(repoFolder);
+
+    // arquivo final
+    string outputFile = Path.Combine(repoFolder, ModelName + "Repository.cs");
+
+    // --- 3) GERAR O CÓDIGO DO REPOSITÓRIO ---
+    StringBuilder sb = new StringBuilder();
+
+    sb.AppendLine("using Microsoft.EntityFrameworkCore;");
+    sb.AppendLine($"using {DbContextNamespace};");
+    sb.AppendLine($"using {ModelsNamespace};");
+    sb.AppendLine("using SEJUCEL.Helpers;");
+    sb.AppendLine("using System.Linq;");
+    sb.AppendLine("using System.Threading.Tasks;");
+    sb.AppendLine();
+    sb.AppendLine("namespace SEJUCEL.Repositories");
+    sb.AppendLine("{");
+    sb.AppendLine($"    public class {ModelName}Repository");
+    sb.AppendLine("    {");
+    sb.AppendLine("        private readonly ApplicationDbContext _context;");
+    sb.AppendLine("        private const int PageSize = 10;");
+    sb.AppendLine();
+    sb.AppendLine($"        public {ModelName}Repository(ApplicationDbContext context)");
+    sb.AppendLine("        {");
+    sb.AppendLine("            _context = context;");
+    sb.AppendLine("        }");
+    sb.AppendLine();
+    sb.AppendLine($"        public async Task<PaginationHelper<{ModelName}>> SearchAndPaginateAsync(string? search, int page)");
+    sb.AppendLine("        {");
+    sb.AppendLine($"            var query = _context.{ModelName}s.AsNoTracking();");
+    sb.AppendLine("            if (!string.IsNullOrWhiteSpace(search))");
+    sb.AppendLine($"                query = query.Where(p => EF.Functions.Like(p.Nome, $\"%{{search}}%\"));");
+    sb.AppendLine();
+    sb.AppendLine($"            return await PaginationHelper<{ModelName}>.CreateAsync(");
+    sb.AppendLine("                query.OrderBy(p => p.Nome), page, PageSize );");
+    sb.AppendLine("        }");
+    sb.AppendLine();
+    sb.AppendLine($"        public async Task<{ModelName}?> FindAsync(int id)");
+    sb.AppendLine("        {");
+    sb.AppendLine($"            return await _context.{ModelName}s.FindAsync(id);");
+    sb.AppendLine("        }");
+    sb.AppendLine();
+    sb.AppendLine($"        public async Task AddAsync({ModelName} entity)");
+    sb.AppendLine("        {");
+    sb.AppendLine($"            _context.{ModelName}s.Add(entity);");
+    sb.AppendLine("            await _context.SaveChangesAsync();");
+    sb.AppendLine("        }");
+    sb.AppendLine();
+    sb.AppendLine($"        public async Task UpdateAsync({ModelName} entity)");
+    sb.AppendLine("        {");
+    sb.AppendLine($"            _context.{ModelName}s.Update(entity);");
+    sb.AppendLine("            await _context.SaveChangesAsync();");
+    sb.AppendLine("        }");
+    sb.AppendLine();
+    sb.AppendLine("        public async Task DeleteAsync(int id)");
+    sb.AppendLine("        {");
+    sb.AppendLine($"            var item = await FindAsync(id);");
+    sb.AppendLine("            if (item != null)");
+    sb.AppendLine("            {");
+    sb.AppendLine($"                _context.{ModelName}s.Remove(item);");
+    sb.AppendLine("                await _context.SaveChangesAsync();");
+    sb.AppendLine("            }");
+    sb.AppendLine("        }");
+    sb.AppendLine("    }");
+    sb.AppendLine("}");
+
+    // --- 4) GRAVAR O ARQUIVO ---
+    File.WriteAllText(outputFile, sb.ToString(), Encoding.UTF8);
+
+    WriteLine("✅ Repository gerado com sucesso em: " + outputFile);
+}
+catch (Exception ex)
+{
+    WriteLine("❌ Erro ao gerar Repository: " + ex.ToString());
+}
+#>

@@ -1,0 +1,198 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ output extension=".cs" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+
+<#
+try
+{
+    string ModelName = "Tavares";                     
+    string ControllerNamespace = "t4_project.Controllers";
+    string DbContextNamespace = "t4_project.Data";
+    string ModelsNamespace = "t4_project.Models";
+
+    string Pluralize(string name) => name.EndsWith("ao") ? name.Substring(0, name.Length - 2) + "oes" : name + "s";
+    string ModelPlural = Pluralize(ModelName);
+
+    var foreignKeys = new[]
+    {
+        new { Name = "", Display = "" } // Se não houver FK, deixar array vazio: new { }[]
+    };
+
+    string ttFilePath = Host.TemplateFile;
+    string projectRoot = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(ttFilePath), "..\\..\\..\\.."));
+    string controllersFolder = Path.Combine(projectRoot, "Controllers");
+    if (!Directory.Exists(controllersFolder))
+        Directory.CreateDirectory(controllersFolder);
+
+    string outputFile = Path.Combine(controllersFolder, ModelPlural + "Controller.cs");
+
+    var sb = new StringBuilder();
+
+    // ===== USINGS =====
+    sb.AppendLine("using Microsoft.AspNetCore.Mvc;");
+    sb.AppendLine("using Microsoft.AspNetCore.Mvc.Rendering;");
+    sb.AppendLine("using Microsoft.EntityFrameworkCore;");
+    sb.AppendLine("using System.Threading.Tasks;");
+    sb.AppendLine("using System.Linq;");
+    sb.AppendLine($"using {DbContextNamespace};");
+    sb.AppendLine($"using {ModelsNamespace};");
+    sb.AppendLine();
+
+    // ===== NAMESPACE =====
+    sb.AppendLine($"namespace {ControllerNamespace}");
+    sb.AppendLine("{");
+    sb.AppendLine($"    public class {ModelPlural}Controller : Controller");
+    sb.AppendLine("    {");
+    sb.AppendLine("        private readonly ApplicationDbContext _context;");
+    sb.AppendLine();
+    sb.AppendLine($"        public {ModelPlural}Controller(ApplicationDbContext context) => _context = context;");
+    sb.AppendLine();
+
+    // ===== INDEX =====
+    sb.AppendLine("        public async Task<IActionResult> Index(string? search, int page = 1)");
+    sb.AppendLine("        {");
+    sb.AppendLine($"            var query = _context.{ModelPlural}.AsQueryable();");
+
+    // Inclui FK somente se houver
+    if (foreignKeys.Length > 0 && !string.IsNullOrWhiteSpace(foreignKeys[0].Name))
+    {
+        foreach (var fk in foreignKeys)
+            sb.AppendLine($"            query = query.Include(x => x.{fk.Name});");
+
+        sb.AppendLine("            if (!string.IsNullOrWhiteSpace(search))");
+        sb.Append("                query = query.Where(x => ");
+        for (int i = 0; i < foreignKeys.Length; i++)
+        {
+            var fk = foreignKeys[i];
+            sb.Append($"EF.Functions.Like(x.{fk.Name}.{fk.Display}, $\"%{{search}}%\")");
+            if (i < foreignKeys.Length - 1) sb.Append(" || ");
+        }
+        sb.AppendLine(");");
+    }
+
+    sb.AppendLine("            int pageSize = 10;");
+    sb.AppendLine("            var totalItems = await query.CountAsync();");
+    sb.AppendLine("            var items = await query.OrderBy(x => x.Id).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();");
+    sb.AppendLine("            ViewBag.CurrentPage = page;");
+    sb.AppendLine("            ViewBag.TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize);");
+    sb.AppendLine("            ViewBag.Search = search;");
+    sb.AppendLine("            return View(items);");
+    sb.AppendLine("        }");
+    sb.AppendLine();
+
+    // ===== DETAILS =====
+    sb.AppendLine("        public async Task<IActionResult> Details(int id)");
+    sb.AppendLine("        {");
+    sb.AppendLine($"            var itemQuery = _context.{ModelPlural}.AsQueryable();");
+    if (foreignKeys.Length > 0 && !string.IsNullOrWhiteSpace(foreignKeys[0].Name))
+    {
+        foreach (var fk in foreignKeys)
+            sb.AppendLine($"            itemQuery = itemQuery.Include(x => x.{fk.Name});");
+    }
+    sb.AppendLine("            var item = await itemQuery.FirstOrDefaultAsync(x => x.Id == id);");
+    sb.AppendLine("            return item == null ? NotFound() : View(item);");
+    sb.AppendLine("        }");
+    sb.AppendLine();
+
+    // ===== CREATE =====
+    sb.AppendLine("        public IActionResult Create()");
+    sb.AppendLine("        {");
+    if (foreignKeys.Length > 0 && !string.IsNullOrWhiteSpace(foreignKeys[0].Name))
+    {
+        foreach (var fk in foreignKeys)
+            sb.AppendLine($"            ViewData[\"{fk.Name}Id\"] = new SelectList(_context.{fk.Name}s, \"Id\", \"{fk.Display}\");");
+    }
+    sb.AppendLine("            return View();");
+    sb.AppendLine("        }");
+    sb.AppendLine();
+
+    sb.AppendLine("        [HttpPost]");
+    sb.AppendLine("        [ValidateAntiForgeryToken]");
+    sb.AppendLine($"        public async Task<IActionResult> Create({ModelName} {ModelName.ToLower()})");
+    sb.AppendLine("        {");
+    sb.AppendLine("            if (!ModelState.IsValid) {");
+    if (foreignKeys.Length > 0 && !string.IsNullOrWhiteSpace(foreignKeys[0].Name))
+    {
+        foreach (var fk in foreignKeys)
+            sb.AppendLine($"                ViewData[\"{fk.Name}Id\"] = new SelectList(_context.{fk.Name}s, \"Id\", \"{fk.Display}\", {ModelName.ToLower()}.{fk.Name}Id);");
+    }
+    sb.AppendLine("                return View(" + ModelName.ToLower() + ");");
+    sb.AppendLine("            }");
+    sb.AppendLine("            using var transaction = await _context.Database.BeginTransactionAsync();");
+    sb.AppendLine("            try { _context." + ModelPlural + ".Add(" + ModelName.ToLower() + "); await _context.SaveChangesAsync(); await transaction.CommitAsync(); return RedirectToAction(nameof(Index)); }");
+    sb.AppendLine("            catch { await transaction.RollbackAsync(); throw; }");
+    sb.AppendLine("        }");
+    sb.AppendLine();
+
+    // ===== EDIT =====
+    sb.AppendLine("        public async Task<IActionResult> Edit(int id)");
+    sb.AppendLine("        {");
+    sb.AppendLine($"            var item = await _context.{ModelPlural}.FindAsync(id);");
+    sb.AppendLine("            if (item == null) return NotFound();");
+    if (foreignKeys.Length > 0 && !string.IsNullOrWhiteSpace(foreignKeys[0].Name))
+    {
+        foreach (var fk in foreignKeys)
+            sb.AppendLine($"            ViewData[\"{fk.Name}Id\"] = new SelectList(_context.{fk.Name}s, \"Id\", \"{fk.Display}\", item.{fk.Name}Id);");
+    }
+    sb.AppendLine("            return View(item);");
+    sb.AppendLine("        }");
+    sb.AppendLine();
+
+    sb.AppendLine("        [HttpPost]");
+    sb.AppendLine("        [ValidateAntiForgeryToken]");
+    sb.AppendLine($"        public async Task<IActionResult> Edit(int id, {ModelName} {ModelName.ToLower()})");
+    sb.AppendLine("        {");
+    sb.AppendLine("            if (id != " + ModelName.ToLower() + ".Id) return NotFound();");
+    sb.AppendLine("            if (!ModelState.IsValid) {");
+    if (foreignKeys.Length > 0 && !string.IsNullOrWhiteSpace(foreignKeys[0].Name))
+    {
+        foreach (var fk in foreignKeys)
+            sb.AppendLine($"                ViewData[\"{fk.Name}Id\"] = new SelectList(_context.{fk.Name}s, \"Id\", \"{fk.Display}\", {ModelName.ToLower()}.{fk.Name}Id);");
+    }
+    sb.AppendLine("                return View(" + ModelName.ToLower() + ");");
+    sb.AppendLine("            }");
+    sb.AppendLine("            using var transaction = await _context.Database.BeginTransactionAsync();");
+    sb.AppendLine("            try { _context." + ModelPlural + ".Update(" + ModelName.ToLower() + "); await _context.SaveChangesAsync(); await transaction.CommitAsync(); return RedirectToAction(nameof(Index)); }");
+    sb.AppendLine("            catch { await transaction.RollbackAsync(); throw; }");
+    sb.AppendLine("        }");
+    sb.AppendLine();
+
+    // ===== DELETE =====
+    sb.AppendLine("        public async Task<IActionResult> Delete(int id)");
+    sb.AppendLine("        {");
+    sb.AppendLine($"            var itemQuery = _context.{ModelPlural}.AsQueryable();");
+    if (foreignKeys.Length > 0 && !string.IsNullOrWhiteSpace(foreignKeys[0].Name))
+    {
+        foreach (var fk in foreignKeys)
+            sb.AppendLine($"            itemQuery = itemQuery.Include(x => x.{fk.Name});");
+    }
+    sb.AppendLine("            var item = await itemQuery.FirstOrDefaultAsync(x => x.Id == id);");
+    sb.AppendLine("            return item == null ? NotFound() : View(item);");
+    sb.AppendLine("        }");
+    sb.AppendLine();
+
+    sb.AppendLine("        [HttpPost, ActionName(\"Delete\")]");
+    sb.AppendLine("        [ValidateAntiForgeryToken]");
+    sb.AppendLine("        public async Task<IActionResult> DeleteConfirmed(int id)");
+    sb.AppendLine("        {");
+    sb.AppendLine($"            var item = await _context.{ModelPlural}.FindAsync(id);");
+    sb.AppendLine("            if (item == null) return NotFound();");
+    sb.AppendLine("            using var transaction = await _context.Database.BeginTransactionAsync();");
+    sb.AppendLine("            try { _context." + ModelPlural + ".Remove(item); await _context.SaveChangesAsync(); await transaction.CommitAsync(); return RedirectToAction(nameof(Index)); }");
+    sb.AppendLine("            catch { await transaction.RollbackAsync(); throw; }");
+    sb.AppendLine("        }");
+
+    sb.AppendLine("    }");
+    sb.AppendLine("}");
+
+    File.WriteAllText(outputFile, sb.ToString(), Encoding.UTF8);
+    WriteLine("✅ Controller gerado com sucesso: " + outputFile);
+}
+catch (Exception ex)
+{
+    WriteLine("❌ Erro ao gerar Controller: " + ex.Message);
+}
+#>

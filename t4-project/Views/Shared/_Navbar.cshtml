@@ -1,0 +1,90 @@
+﻿<div class="navbar navbar-dark navbar-expand-xl navbar-static" style="background: #005171;">
+    <div class="container-fluid">
+        <div class="d-flex d-xl-none me-2">
+            <button type="button" class="navbar-toggler sidebar-mobile-main-toggle rounded-pill">
+                <i class="ph-list"></i>
+            </button>
+        </div>
+
+        <div class="navbar-brand flex-0 flex-sm-1 py-0">
+            <a href="/" class="d-flex align-items-center text-decoration-none text-white gap-2">
+                <img src="/layout/assets/img/logo.png" style="height: 65px" />
+                <img src="/layout/assets/img/SETIC.png" style="height: 55px" />
+            </a>
+        </div>
+
+        <ul class="nav flex-row justify-content-end order-1 order-lg-2">
+            <li class="nav-item nav-item-dropdown-lg ms-lg-2">
+                <a href="#" class="navbar-nav-link align-items-center rounded-pill p-1" id="userMenuToggle">
+                    <div class="status-indicator-container">
+                        <i class="ph-user-gear"></i>
+                    </div>
+                    <span class="d-none d-xl-inline-block mx-lg-2">
+                    </span>
+                </a>
+
+                <div id="userMenu" class="custom-dropdown-menu">
+                    <a href="/auth/logout" class="btn btn-logout">
+                        <i class="ph-door me-2"></i>Sair
+                    </a>
+                </div>
+
+            </li>
+        </ul>
+    </div>
+</div>
+
+<style>
+    .custom-dropdown-menu {
+        display: none;
+        position: absolute;
+        background-color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+        right: 0;
+        margin-top: 0px;
+        z-index: 1000;
+        padding: 4px;
+        width: 200px;
+    }
+
+    .btn-logout {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        color: #4a4a4a;
+        text-align: left;
+        font-size: 14px;
+        background-color: white;
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+        text-decoration: none;
+    }
+
+        .btn-logout:hover {
+            color: #4a4a4a;
+            background-color: #f2f2f2;
+        }
+
+    .nav-item-dropdown-lg {
+        position: relative;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const userMenuToggle = document.getElementById('userMenuToggle');
+        const userMenu = document.getElementById('userMenu');
+
+        userMenuToggle.addEventListener('click', function (e) {
+            e.preventDefault();
+            userMenu.style.display = userMenu.style.display === 'block' ? 'none' : 'block';
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!userMenu.contains(e.target) && !userMenuToggle.contains(e.target)) {
+                userMenu.style.display = 'none';
+            }
+        });
+    });
+</script>

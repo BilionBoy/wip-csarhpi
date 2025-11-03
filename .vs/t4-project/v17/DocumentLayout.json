@@ -1,0 +1,96 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\02588772277\\source\\repos\\t4-project\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{44FFE10F-FE14-48D3-830E-0E350FB08D82}|t4-project\\t4-project.csproj|c:\\users\\02588772277\\source\\repos\\t4-project\\t4-project\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{44FFE10F-FE14-48D3-830E-0E350FB08D82}|t4-project\\t4-project.csproj|solutionrelative:t4-project\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{44FFE10F-FE14-48D3-830E-0E350FB08D82}|t4-project\\t4-project.csproj|c:\\users\\02588772277\\source\\repos\\t4-project\\t4-project\\lib\\templates\\scaffold\\controllers\\controller.tt||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{44FFE10F-FE14-48D3-830E-0E350FB08D82}|t4-project\\t4-project.csproj|solutionrelative:t4-project\\lib\\templates\\scaffold\\controllers\\controller.tt||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{44FFE10F-FE14-48D3-830E-0E350FB08D82}|t4-project\\t4-project.csproj|c:\\users\\02588772277\\source\\repos\\t4-project\\t4-project\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{44FFE10F-FE14-48D3-830E-0E350FB08D82}|t4-project\\t4-project.csproj|solutionrelative:t4-project\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{44FFE10F-FE14-48D3-830E-0E350FB08D82}|t4-project\\t4-project.csproj|c:\\users\\02588772277\\source\\repos\\t4-project\\t4-project\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{44FFE10F-FE14-48D3-830E-0E350FB08D82}|t4-project\\t4-project.csproj|solutionrelative:t4-project\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\02588772277\\source\\repos\\t4-project\\t4-project\\Program.cs",
+              "RelativeDocumentMoniker": "t4-project\\Program.cs",
+              "ToolTip": "C:\\Users\\02588772277\\source\\repos\\t4-project\\t4-project\\Program.cs",
+              "RelativeToolTip": "t4-project\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-03T13:02:57.243Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "HomeController.cs",
+              "DocumentMoniker": "C:\\Users\\02588772277\\source\\repos\\t4-project\\t4-project\\Controllers\\HomeController.cs",
+              "RelativeDocumentMoniker": "t4-project\\Controllers\\HomeController.cs",
+              "ToolTip": "C:\\Users\\02588772277\\source\\repos\\t4-project\\t4-project\\Controllers\\HomeController.cs",
+              "RelativeToolTip": "t4-project\\Controllers\\HomeController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-03T13:01:30.451Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ApplicationDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\02588772277\\source\\repos\\t4-project\\t4-project\\Data\\ApplicationDbContext.cs",
+              "RelativeDocumentMoniker": "t4-project\\Data\\ApplicationDbContext.cs",
+              "ToolTip": "C:\\Users\\02588772277\\source\\repos\\t4-project\\t4-project\\Data\\ApplicationDbContext.cs",
+              "RelativeToolTip": "t4-project\\Data\\ApplicationDbContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-03T13:01:28.987Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Controller.tt",
+              "DocumentMoniker": "C:\\Users\\02588772277\\source\\repos\\t4-project\\t4-project\\Lib\\Templates\\Scaffold\\Controllers\\Controller.tt",
+              "RelativeDocumentMoniker": "t4-project\\Lib\\Templates\\Scaffold\\Controllers\\Controller.tt",
+              "ToolTip": "C:\\Users\\02588772277\\source\\repos\\t4-project\\t4-project\\Lib\\Templates\\Scaffold\\Controllers\\Controller.tt",
+              "RelativeToolTip": "t4-project\\Lib\\Templates\\Scaffold\\Controllers\\Controller.tt",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
+              "WhenOpened": "2025-11-03T12:17:00.983Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

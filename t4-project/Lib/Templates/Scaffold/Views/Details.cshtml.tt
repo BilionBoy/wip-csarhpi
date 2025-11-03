@@ -1,0 +1,108 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ output extension=".cshtml" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+
+<#
+try
+{
+    // ===================== CONFIGURAÇÕES =====================
+    string ModelName = "Acao"; // altere conforme o model
+    string[] Properties = new string[] { "Id", "Data" }; // campos simples
+    var foreignKeys = new[]
+    {
+        new { Name = "Participante", Display = "Nome" },
+        new { Name = "Tipo", Display = "Descricao" },
+        new { Name = "Evento", Display = "Descricao" }
+    };
+
+    // ===================== FUNÇÃO DE PLURALIZAÇÃO =====================
+    string Pluralize(string model)
+    {
+        switch (model)
+        {
+            case "Acao": return "Acoes";
+            case "Evento": return "Eventos";
+            case "Municipio": return "Municipios";
+            default:
+                if (model.EndsWith("ao")) return model.Substring(0, model.Length - 2) + "oes";
+                if (model.EndsWith("o")) return model.Substring(0, model.Length - 1) + "os";
+                return model + "s";
+        }
+    }
+
+    // ===================== CAMINHOS =====================
+    string ttFilePath = Host.TemplateFile;
+    string projectRoot = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(ttFilePath), "../../../../"));
+    string viewsFolder = Path.Combine(projectRoot, "Views", Pluralize(ModelName));
+
+    if (!Directory.Exists(viewsFolder))
+        Directory.CreateDirectory(viewsFolder);
+
+    string outputFile = Path.Combine(viewsFolder, "Details.cshtml");
+
+    // ===================== GERANDO VIEW =====================
+    var sb = new StringBuilder();
+    sb.AppendLine("@model SEJUCEL.Models." + ModelName);
+    sb.AppendLine();
+    sb.AppendLine("@{");
+    sb.AppendLine("    ViewData[\"Title\"] = \"Visualizar " + ModelName + "\";");
+    sb.AppendLine("}");
+    sb.AppendLine();
+    sb.AppendLine("@section ContextNav {");
+    sb.AppendLine("    <div class=\"context-nav d-flex align-items-center justify-content-between mb-3\">");
+    sb.AppendLine("        <h2 class=\"page-title m-0\">Visualizar " + ModelName + "</h2>");
+    sb.AppendLine("        <a asp-action=\"Index\" class=\"modern-btn modern-btn-secondary d-flex align-items-center gap-1\">");
+    sb.AppendLine("            <i class=\"ph-arrow-left\"></i>");
+    sb.AppendLine("            <span>Voltar</span>");
+    sb.AppendLine("        </a>");
+    sb.AppendLine("    </div>");
+    sb.AppendLine("}");
+    sb.AppendLine();
+    sb.AppendLine("<div class=\"modern-card shadow-sm border-0 rounded-3\">");
+    sb.AppendLine("    <div class=\"modern-card-header d-flex justify-content-between align-items-center\">");
+    sb.AppendLine("        <span class=\"fs-5 fw-bold\">Detalhes do " + ModelName + "</span>");
+    sb.AppendLine("    </div>");
+    sb.AppendLine("    <div class=\"modern-card-body py-3 px-3\">");
+
+    // Campos simples
+    foreach (var prop in Properties)
+    {
+        if (prop == "Id") continue; // geralmente não exibimos Id
+        sb.AppendLine("        <div class=\"modern-form-group mb-3\">");
+        sb.AppendLine("            <label class=\"modern-form-label fw-bold text-secondary\">" + prop + "</label>");
+        sb.AppendLine("            <p class=\"modern-readonly-text border rounded px-2 py-1 bg-light\">@Model." + prop + "</p>");
+        sb.AppendLine("        </div>");
+    }
+
+    // Campos FK
+    foreach (var fk in foreignKeys)
+    {
+        sb.AppendLine("        <div class=\"modern-form-group mb-3\">");
+        sb.AppendLine("            <label class=\"modern-form-label fw-bold text-secondary\">" + fk.Name + "</label>");
+        sb.AppendLine("            <p class=\"modern-readonly-text border rounded px-2 py-1 bg-light\">@Model." + fk.Name + "." + fk.Display + "</p>");
+        sb.AppendLine("        </div>");
+    }
+
+    sb.AppendLine("    </div>");
+    sb.AppendLine("    <div class=\"modern-card-footer d-flex justify-content-end gap-2 py-3 px-3\">");
+    sb.AppendLine("        <a asp-action=\"Edit\" asp-route-id=\"@Model.Id\" class=\"modern-btn modern-btn-primary d-flex align-items-center gap-1\">");
+    sb.AppendLine("            <i class=\"ph-pen\"></i> Editar");
+    sb.AppendLine("        </a>");
+    sb.AppendLine("        <a asp-action=\"Index\" class=\"modern-btn modern-btn-secondary d-flex align-items-center gap-1\">");
+    sb.AppendLine("            <i class=\"ph-arrow-left\"></i> Voltar");
+    sb.AppendLine("        </a>");
+    sb.AppendLine("    </div>");
+    sb.AppendLine("</div>");
+
+    // ===================== ESCREVE ARQUIVO =====================
+    File.WriteAllText(outputFile, sb.ToString(), Encoding.UTF8);
+    WriteLine("✅ View Details.cshtml gerada em: " + outputFile);
+}
+catch (Exception ex)
+{
+    WriteLine("❌ Erro ao gerar Details.cshtml: " + ex.Message);
+}
+#>

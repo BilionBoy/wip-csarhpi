@@ -1,0 +1,10 @@
+﻿@model object
+<tr>
+    @foreach (var prop in Model.GetType().GetProperties())
+    {
+        <td>@prop.GetValue(Model)</td>
+    }
+    <td>
+        Id: @Model.GetType().GetProperty("Id")?.GetValue(Model)
+    </td>
+</tr>

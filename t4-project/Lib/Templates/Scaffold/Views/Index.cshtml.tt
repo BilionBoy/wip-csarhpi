@@ -1,0 +1,143 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ output extension=".cshtml" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Text" #>
+<#
+try
+{
+    string ModelName = "Acao";
+    string[] Properties = new string[] { "Id", "Data" }; // campos simples
+    var foreignKeys = new[] {
+        new { Name = "Participante", Display = "Nome" },
+        new { Name = "Tipo", Display = "Descricao" },
+        new { Name = "Evento", Display = "Descricao" }
+    };
+
+    string ttFilePath = Host.TemplateFile;
+    string projectRoot = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(ttFilePath), "..\\..\\..\\.."));
+
+    // Corrige pluralização: "Acao" -> "Acoes"
+    string viewsFolder = Path.Combine(projectRoot, "Views",
+        ModelName.EndsWith("ao") ? ModelName.Substring(0, ModelName.Length - 2) + "oes" :
+        ModelName.EndsWith("o") ? ModelName.Substring(0, ModelName.Length - 1) + "os" :
+        ModelName + "s");
+
+    if (!Directory.Exists(viewsFolder))
+        Directory.CreateDirectory(viewsFolder);
+
+    string outputFile = Path.Combine(viewsFolder, "Index.cshtml");
+    var sb = new StringBuilder();
+
+    sb.AppendLine("@model IEnumerable<SEJUCEL.Models." + ModelName + ">");
+    sb.AppendLine();
+    sb.AppendLine("@{");
+    sb.AppendLine("    ViewData[\"Title\"] = \"" + ModelName + "s\";");
+    sb.AppendLine("    var search = ViewBag.Search as string ?? \"\";");
+    sb.AppendLine("    var currentPage = ViewBag.CurrentPage as int? ?? 1;");
+    sb.AppendLine("    var totalPages = ViewBag.TotalPages as int? ?? 1;");
+    sb.AppendLine("}");
+    sb.AppendLine();
+    sb.AppendLine("@section ContextNav {");
+    sb.AppendLine("    <div class=\"context-nav d-flex align-items-center justify-content-between mb-3\">");
+    sb.AppendLine("        <h2 class=\"page-title m-0\">" + ModelName + "s</h2>");
+    sb.AppendLine("        <a asp-action=\"Create\" class=\"modern-btn modern-btn-primary\">");
+    sb.AppendLine("            <i class=\"ph-plus\"></i>");
+    sb.AppendLine("            <span>Criar Novo</span>");
+    sb.AppendLine("        </a>");
+    sb.AppendLine("    </div>");
+    sb.AppendLine("}");
+    sb.AppendLine();
+    sb.AppendLine("<div class=\"modern-card\">");
+    sb.AppendLine("    <div class=\"modern-card-header d-flex align-items-center\">");
+    sb.AppendLine("        <form method=\"get\" class=\"modern-search-form d-flex align-items-center gap-2 flex-grow-1\" autocomplete=\"off\">");
+    sb.AppendLine("            <input type=\"text\" name=\"search\" value=\"@search\" class=\"modern-search-input flex-grow-1\" placeholder=\"Pesquisar...\" />");
+    sb.AppendLine("            <button type=\"submit\" class=\"modern-btn modern-btn-primary modern-btn-icon\">");
+    sb.AppendLine("                <i class=\"ph-magnifying-glass\"></i>");
+    sb.AppendLine("            </button>");
+    sb.AppendLine("            @if (!string.IsNullOrEmpty(search))");
+    sb.AppendLine("            {");
+    sb.AppendLine("                <a href=\"@Url.Action(\"Index\")\" class=\"modern-btn modern-btn-secondary modern-btn-icon\">");
+    sb.AppendLine("                    <i class=\"ph-x-circle\"></i>");
+    sb.AppendLine("                </a>");
+    sb.AppendLine("            }");
+    sb.AppendLine("        </form>");
+    sb.AppendLine("    </div>");
+    sb.AppendLine();
+    sb.AppendLine("    <div class=\"modern-card-body\">");
+    sb.AppendLine("        @if (Model.Any())");
+    sb.AppendLine("        {");
+    sb.AppendLine("            <div class=\"modern-table-container\">");
+    sb.AppendLine("                <table class=\"modern-table\">");
+    sb.AppendLine("                    <thead>");
+    sb.AppendLine("                        <tr>");
+    sb.AppendLine("                            <th style=\"width:80px; text-align:center;\">Ações</th>");
+    // colunas simples
+    for(int i=1; i<Properties.Length; i++)
+        sb.AppendLine("                            <th>" + Properties[i] + "</th>");
+    // colunas FKs
+    foreach(var fk in foreignKeys)
+        sb.AppendLine("                            <th>" + fk.Name + "</th>");
+    sb.AppendLine("                        </tr>");
+    sb.AppendLine("                    </thead>");
+    sb.AppendLine("                    <tbody>");
+    sb.AppendLine("                        @foreach (var item in Model)");
+    sb.AppendLine("                        {");
+    sb.AppendLine("                            <tr>");
+    sb.AppendLine("                                <td style=\"text-align:center;\">");
+    sb.AppendLine("                                    <div class=\"modern-dropdown\">");
+    sb.AppendLine("                                        <a href=\"#\" class=\"modern-dropdown-toggle\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">");
+    sb.AppendLine("                                            <i class=\"ph-gear\"></i>");
+    sb.AppendLine("                                        </a>");
+    sb.AppendLine("                                        <div class=\"dropdown-menu modern-dropdown-menu\">");
+    sb.AppendLine("                                            <div class=\"modern-dropdown-header\">Opções</div>");
+    sb.AppendLine("                                            <a asp-action=\"Edit\" asp-route-id=\"@item.Id\" class=\"modern-dropdown-item\"><i class=\"ph-pen\"></i> Editar</a>");
+    sb.AppendLine("                                            <a asp-action=\"Details\" asp-route-id=\"@item.Id\" class=\"modern-dropdown-item\"><i class=\"ph-info\"></i> Detalhes</a>");
+    sb.AppendLine("                                            <a asp-action=\"Delete\" asp-route-id=\"@item.Id\" class=\"modern-dropdown-item modern-btn-danger\"><i class=\"ph-trash-simple\"></i> Excluir</a>");
+    sb.AppendLine("                                        </div>");
+    sb.AppendLine("                                    </div>");
+    sb.AppendLine("                                </td>");
+    // td simples
+    for(int i=1; i<Properties.Length; i++)
+        sb.AppendLine("                                <td>@item." + Properties[i] + "</td>");
+    // td FKs
+    foreach(var fk in foreignKeys)
+        sb.AppendLine("                                <td>@item." + fk.Name + "." + fk.Display + "</td>");
+    sb.AppendLine("                            </tr>");
+    sb.AppendLine("                        }");
+    sb.AppendLine("                    </tbody>");
+    sb.AppendLine("                </table>");
+    sb.AppendLine("            </div>");
+    sb.AppendLine("        }");
+    sb.AppendLine("        else");
+    sb.AppendLine("        {");
+    sb.AppendLine("            <div class=\"modern-empty-state\">");
+    sb.AppendLine("                <i class=\"ph-folder-open\"></i>");
+    sb.AppendLine("                <h3>Nenhum registro encontrado</h3>");
+    sb.AppendLine("                <p>Comece criando um novo registro</p>");
+    sb.AppendLine("            </div>");
+    sb.AppendLine("        }");
+    sb.AppendLine("    </div>");
+    sb.AppendLine();
+    sb.AppendLine("    @if (Model.Any() && totalPages > 1)");
+    sb.AppendLine("    {");
+    sb.AppendLine("        <div class=\"modern-card-footer\">");
+    sb.AppendLine("            <div class=\"modern-pagination\">");
+    sb.AppendLine("                @for (int i = 1; i <= totalPages; i++)");
+    sb.AppendLine("                {");
+    sb.AppendLine("                    var cls = i == currentPage ? \"modern-btn modern-btn-primary\" : \"modern-btn modern-btn-secondary\";");
+    sb.AppendLine("                    <a href=\"@Url.Action(\"Index\", new { search = search, page = i })\" class=\"@cls\">@i</a>");
+    sb.AppendLine("                }");
+    sb.AppendLine("            </div>");
+    sb.AppendLine("        </div>");
+    sb.AppendLine("    }");
+    sb.AppendLine("</div>");
+
+    File.WriteAllText(outputFile, sb.ToString(), Encoding.UTF8);
+    WriteLine("✅ View Index.cshtml gerada em: " + outputFile);
+}
+catch (Exception ex)
+{
+    WriteLine("❌ Erro ao gerar Index.cshtml: " + ex.Message);
+}
+#>

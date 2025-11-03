@@ -1,0 +1,91 @@
+﻿@{
+    Layout = null;
+    var title = ViewData["Title"] ?? "JIR";
+}
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="utf-8" />
+    <title>@title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/layout/assets/fonts/inter/inter.css" />
+    <link rel="stylesheet" href="/layout/assets/icons/phosphor/styles.min.css" />
+    <link rel="stylesheet" href="/layout/assets/css/all.min.css" />
+    <link rel="stylesheet" href="/layout/assets/css/animate.min.css" />
+    <link rel="stylesheet" href="/layout/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/layout/assets/css/layout.min.css" />
+    <link rel="stylesheet" href="/layout/assets/css/components.min.css" />
+    <link rel="stylesheet" href="/layout/assets/css/admin.css" />
+
+    @RenderSection("Styles", required: false)
+</head>
+
+<body>
+    @await Html.PartialAsync("_Navbar")
+    <div class="page-content">
+        @await Html.PartialAsync("_Sidebar")
+        <div class="content-wrapper">
+            <div class="content-inner">
+                @RenderSection("ContextNav", required: false)
+                <div class="content">
+                    @RenderBody()
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" style="position: fixed; top: 1rem; right: 1rem; z-index: 9999;"></div>
+
+    <script src="/layout/assets/js/jquery/jquery.min.js"></script>
+    <script src="/layout/assets/js/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="/layout/assets/js/app.js"></script>
+    <script src="/layout/assets/js/custom.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    @RenderSection("Scripts", required: false)
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const toastContainer = document.getElementById("toast-container");
+            const message = "@TempData["Alert"]";
+            if (message) showToast(message);
+        });
+
+        function showToast(message, type = "error") {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            toast.textContent = message;
+            toast.className = "toast " + type;
+            container.appendChild(toast);
+
+            setTimeout(() => toast.classList.add("show"), 100);
+            setTimeout(() => {
+                toast.classList.remove("show");
+                setTimeout(() => toast.remove(), 400);
+            }, 4000);
+        }
+
+        const style = document.createElement("style");
+        style.textContent = `
+            .toast {
+                min-width: 220px;
+                margin-bottom: 10px;
+                padding: 12px 20px;
+                background: #f87171;
+                color: white;
+                border-radius: 8px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                opacity: 0;
+                transform: translateX(100%);
+                transition: all 0.4s ease-in-out;
+                font-family: sans-serif;
+            }
+            .toast.show {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

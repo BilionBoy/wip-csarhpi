@@ -1,0 +1,269 @@
+﻿<div class="sidebar sidebar-dark sidebar-main sidebar-expand-xl" id="sidebar">
+    <!-- BOTÃO X -->
+    <div class="sidebar-toggle d-flex justify-content-end px-2 py-2 d-xl-none">
+        <button id="sidebar-toggle-btn" class="sidebar-mobile-main-toggle">
+            <i class="ph-x"></i>
+        </button>
+    </div>
+
+    <div class="sidebar-content">
+        <div class="sidebar-section-body mt-3">
+            <div class="form-control-feedback form-control-feedback-end">
+                <input type="search"
+                       id="sidebar-search-input"
+                       class="form-control"
+                       placeholder="Pesquisar"
+                       onkeyup="filterSidebar()" />
+                <div class="form-control-feedback-icon">
+                    <i class="ph-magnifying-glass opacity-50"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Itens da sidebar -->
+        <div class="sidebar-section">
+            <ul class="nav nav-sidebar" data-nav-type="accordion" id="sidebar-items">
+                <li class="nav-item">
+                    <a asp-controller="Home" asp-action="Index" class="nav-link" data-no-close>
+                        <i class="ph-house"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+
+                <div class="sidebar-section-header">
+                    <h6>Participantes</h6>
+                </div>
+                <li class="nav-item">
+                    <a asp-controller="Participantes" asp-action="Index" class="nav-link">
+                        <i class="ph-users"></i>
+                        <span>Participantes</span>
+                    </a>
+                </li>
+
+                <div class="sidebar-section-header">
+                    <h6>Ações Realizadas</h6>
+                </div>
+                <li class="nav-item">
+                    <a asp-controller="Acoes" asp-action="Index" class="nav-link">
+                        <i class="ph-qr-code"></i>
+                        <span>Ações Realizadas</span>
+                    </a>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    .sidebar-main {
+        background: #f8f9fa !important;
+        border-right: 1px solid #e1e4e8;
+        box-shadow: 2px 0 8px rgba(0,0,0,0.03);
+    }
+
+    .sidebar-section-body h5 {
+        color: #374151;
+        font-weight: 600;
+        font-size: .9375rem;
+        letter-spacing: .02em;
+        text-transform: uppercase;
+        margin: 0;
+    }
+
+    .sidebar-mobile-main-toggle {
+        background: transparent !important;
+        transition: all 0.2s ease;
+        border: none;
+    }
+
+        .sidebar-mobile-main-toggle:hover {
+            background: rgba(0,0,0,.04) !important;
+        }
+
+        .sidebar-mobile-main-toggle i {
+            color: #6c757d;
+        }
+
+    .sidebar-section-body .form-control {
+        background: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        padding: .5rem 2.25rem .5rem .875rem;
+        font-size: .875rem;
+        color: #212529;
+        box-shadow: 0 1px 2px rgba(0,0,0,.04);
+        transition: all 0.2s ease;
+    }
+
+        .sidebar-section-body .form-control:focus {
+            border-color: #2196F3;
+            box-shadow: 0 0 0 3px rgba(33,150,243,.1);
+            outline: none;
+        }
+
+        .sidebar-section-body .form-control::placeholder {
+            color: #6c757d;
+        }
+
+    .sidebar-section-body .form-control-feedback-icon {
+        position: absolute;
+        color: #6c757d;
+        right: .75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+
+        .sidebar-section-body .form-control-feedback-icon i {
+            color: #adb5bd;
+            font-size: 1rem;
+        }
+
+    .sidebar-section {
+        padding: .75rem .875rem;
+    }
+
+        .sidebar-section:first-child {
+            padding-top: 1rem;
+        }
+
+    .sidebar-section-header {
+        padding: .625rem .875rem .375rem;
+        margin-top: .5rem;
+    }
+
+        .sidebar-section-header h6 {
+            color: #868e96;
+            font-size: .6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            margin: 0;
+        }
+
+    .nav-sidebar .nav-item {
+        margin-bottom: .125rem;
+    }
+
+    .nav-sidebar .nav-link {
+        display: flex;
+        align-items: center;
+        padding: .625rem .875rem;
+        border-radius: 6px;
+        color: #212529;
+        font-weight: 500;
+        font-size: .875rem;
+        transition: all .15s ease;
+    }
+
+        .nav-sidebar .nav-link:hover {
+            background: rgba(30,136,229,.08);
+            color: #1e88e5;
+        }
+
+        .nav-sidebar .nav-link.active {
+            background: #1e88e5;
+            color: #fff;
+            font-weight: 600;
+        }
+
+            .nav-sidebar .nav-link.active i {
+                color: #fff;
+            }
+
+        .nav-sidebar .nav-link i {
+            font-size: 1.125rem;
+            margin-right: .75rem;
+            color: #000;
+            transition: color .15s ease;
+            flex-shrink: 0;
+        }
+
+        .nav-sidebar .nav-link:hover i {
+            color: #2196F3;
+        }
+
+    .sidebar.collapsed {
+        transform: translateX(-100%);
+        transition: transform .3s ease;
+    }
+
+    #sidebar-toggle-btn {
+        background: rgba(0,0,0,.05) !important;
+        border: none;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all .2s ease;
+    }
+
+        #sidebar-toggle-btn i {
+            color: #000;
+            font-size: 1.25rem;
+            transition: color .2s ease;
+        }
+
+        #sidebar-toggle-btn:hover {
+            background: rgba(0,0,0,.1) !important;
+        }
+
+        #sidebar-toggle-btn:active {
+            background: rgba(0,0,0,.15) !important;
+        }
+
+    .sidebar-content::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .sidebar-content::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .sidebar-content::-webkit-scrollbar-thumb {
+        background: #dee2e6;
+        border-radius: 10px;
+    }
+
+        .sidebar-content::-webkit-scrollbar-thumb:hover {
+            background: #ced4da;
+        }
+
+    box-shadow: 3px 0 12px rgba(0,0,0,.06);
+    }
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggles = document.querySelectorAll('.sidebar-mobile-main-toggle');
+
+        sidebarToggles.forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.preventDefault();
+                sidebar.classList.toggle('collapsed');
+            });
+        });
+
+        document.addEventListener('click', e => {
+            if (!sidebar.contains(e.target) && !e.target.classList.contains('sidebar-mobile-main-toggle')) {
+                sidebar.classList.remove('collapsed');
+            }
+        });
+    });
+
+    function filterSidebar() {
+        const input = document.getElementById('sidebar-search-input').value.toLowerCase();
+        const items = document.querySelectorAll('#sidebar-items .nav-item');
+
+        items.forEach(item => {
+            const text = item.innerText.toLowerCase();
+            item.style.display = text.includes(input) ? '' : 'none';
+        });
+    }
+</script>
