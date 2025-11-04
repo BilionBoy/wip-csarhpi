@@ -12,9 +12,17 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Controller.cs</LastGenOutput>
     </None>
+    <None Update="Lib\Templates\Scaffold\Models\Model.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Model.cs</LastGenOutput>
+    </None>
     <None Update="Lib\Templates\Scaffold\Repositorios\Repositories.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Repositories.cs</LastGenOutput>
+    </None>
+    <None Update="Lib\Templates\Scaffold\ScaffoldGenerator.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ScaffoldGenerator.txt</LastGenOutput>
     </None>
     <None Update="Lib\Templates\Scaffold\Views\Create.cshtml.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -34,7 +42,7 @@
     </None>
     <None Update="Lib\Templates\Scaffold\Views\Index.cshtml.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Index.cshtml.cshtml</LastGenOutput>
+      <LastGenOutput>Index.cshtml.cs</LastGenOutput>
     </None>
   </ItemGroup>
 

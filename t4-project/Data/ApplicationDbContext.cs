@@ -11,6 +11,5 @@ namespace t4_project.Data
         {
         }
 
-        public DbSet<Categoria> Categorias { get; set; }
     }
 }

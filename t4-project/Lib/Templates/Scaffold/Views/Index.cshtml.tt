@@ -1,88 +1,55 @@
-﻿<#@ template debug="false" hostspecific="true" language="C#" #>
-<#@ output extension=".cshtml" #>
-<#@ import namespace="System" #>
-<#@ import namespace="System.IO" #>
+﻿<#@ template language="C#" hostspecific="true" #>
 <#@ import namespace="System.Text" #>
-<#
-try
+<#@ import namespace="System.Collections.Generic" #>
+
+<#+
+// Função que gera todo o Index.cshtml moderno, incluindo paginação
+string GenerateIndexViewCode(string modelName, List<PropertyInfo> props, List<ForeignKeyInfo> fks, string modelPlural)
 {
-    string ModelName = "Acao";
-    string[] Properties = new string[] { "Id", "Data" }; // campos simples
-    var foreignKeys = new[] {
-        new { Name = "Participante", Display = "Nome" },
-        new { Name = "Tipo", Display = "Descricao" },
-        new { Name = "Evento", Display = "Descricao" }
-    };
-
-    string ttFilePath = Host.TemplateFile;
-    string projectRoot = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(ttFilePath), "..\\..\\..\\.."));
-
-    // Corrige pluralização: "Acao" -> "Acoes"
-    string viewsFolder = Path.Combine(projectRoot, "Views",
-        ModelName.EndsWith("ao") ? ModelName.Substring(0, ModelName.Length - 2) + "oes" :
-        ModelName.EndsWith("o") ? ModelName.Substring(0, ModelName.Length - 1) + "os" :
-        ModelName + "s");
-
-    if (!Directory.Exists(viewsFolder))
-        Directory.CreateDirectory(viewsFolder);
-
-    string outputFile = Path.Combine(viewsFolder, "Index.cshtml");
     var sb = new StringBuilder();
 
-    sb.AppendLine("@model IEnumerable<SEJUCEL.Models." + ModelName + ">");
+    sb.AppendLine("@model t4_project.Helpers.PaginationHelper<t4_project.Models." + modelName + ">");
     sb.AppendLine();
-    sb.AppendLine("@{");
-    sb.AppendLine("    ViewData[\"Title\"] = \"" + ModelName + "s\";");
-    sb.AppendLine("    var search = ViewBag.Search as string ?? \"\";");
-    sb.AppendLine("    var currentPage = ViewBag.CurrentPage as int? ?? 1;");
-    sb.AppendLine("    var totalPages = ViewBag.TotalPages as int? ?? 1;");
-    sb.AppendLine("}");
-    sb.AppendLine();
-    sb.AppendLine("@section ContextNav {");
+    sb.AppendLine("@{ ViewData[\"Title\"] = \"" + modelPlural + "\"; }");
+
+    // ContextNav moderno
+    sb.AppendLine("@section ContextNav {{");
     sb.AppendLine("    <div class=\"context-nav d-flex align-items-center justify-content-between mb-3\">");
-    sb.AppendLine("        <h2 class=\"page-title m-0\">" + ModelName + "s</h2>");
+    sb.AppendLine("        <h2 class=\"page-title m-0\">" + modelPlural + "</h2>");
     sb.AppendLine("        <a asp-action=\"Create\" class=\"modern-btn modern-btn-primary\">");
-    sb.AppendLine("            <i class=\"ph-plus\"></i>");
-    sb.AppendLine("            <span>Criar Novo</span>");
+    sb.AppendLine("            <i class=\"ph-plus\"></i><span>Criar Novo</span>");
     sb.AppendLine("        </a>");
     sb.AppendLine("    </div>");
-    sb.AppendLine("}");
+    sb.AppendLine("}}");
     sb.AppendLine();
+
+    // Card principal
     sb.AppendLine("<div class=\"modern-card\">");
-    sb.AppendLine("    <div class=\"modern-card-header d-flex align-items-center\">");
-    sb.AppendLine("        <form method=\"get\" class=\"modern-search-form d-flex align-items-center gap-2 flex-grow-1\" autocomplete=\"off\">");
-    sb.AppendLine("            <input type=\"text\" name=\"search\" value=\"@search\" class=\"modern-search-input flex-grow-1\" placeholder=\"Pesquisar...\" />");
-    sb.AppendLine("            <button type=\"submit\" class=\"modern-btn modern-btn-primary modern-btn-icon\">");
-    sb.AppendLine("                <i class=\"ph-magnifying-glass\"></i>");
-    sb.AppendLine("            </button>");
-    sb.AppendLine("            @if (!string.IsNullOrEmpty(search))");
-    sb.AppendLine("            {");
-    sb.AppendLine("                <a href=\"@Url.Action(\"Index\")\" class=\"modern-btn modern-btn-secondary modern-btn-icon\">");
-    sb.AppendLine("                    <i class=\"ph-x-circle\"></i>");
-    sb.AppendLine("                </a>");
-    sb.AppendLine("            }");
-    sb.AppendLine("        </form>");
-    sb.AppendLine("    </div>");
-    sb.AppendLine();
     sb.AppendLine("    <div class=\"modern-card-body\">");
-    sb.AppendLine("        @if (Model.Any())");
-    sb.AppendLine("        {");
+
+    // Verifica se há itens
+    sb.AppendLine("        @if(Model.Items.Any()) {{");
     sb.AppendLine("            <div class=\"modern-table-container\">");
     sb.AppendLine("                <table class=\"modern-table\">");
     sb.AppendLine("                    <thead>");
     sb.AppendLine("                        <tr>");
-    sb.AppendLine("                            <th style=\"width:80px; text-align:center;\">Ações</th>");
-    // colunas simples
-    for(int i=1; i<Properties.Length; i++)
-        sb.AppendLine("                            <th>" + Properties[i] + "</th>");
-    // colunas FKs
-    foreach(var fk in foreignKeys)
+    sb.AppendLine("                            <th style=\"width:80px;text-align:center;\">Ações</th>");
+
+    // Cabeçalho de propriedades
+    foreach (var p in props)
+        if (p.Name != "Id")
+            sb.AppendLine("                            <th>" + p.Name + "</th>");
+
+    // Cabeçalho de FKs
+    foreach (var fk in fks)
         sb.AppendLine("                            <th>" + fk.Name + "</th>");
+
     sb.AppendLine("                        </tr>");
     sb.AppendLine("                    </thead>");
     sb.AppendLine("                    <tbody>");
-    sb.AppendLine("                        @foreach (var item in Model)");
-    sb.AppendLine("                        {");
+
+    // Loop pelos itens
+    sb.AppendLine("                        @foreach(var item in Model.Items) {{");
     sb.AppendLine("                            <tr>");
     sb.AppendLine("                                <td style=\"text-align:center;\">");
     sb.AppendLine("                                    <div class=\"modern-dropdown\">");
@@ -97,47 +64,52 @@ try
     sb.AppendLine("                                        </div>");
     sb.AppendLine("                                    </div>");
     sb.AppendLine("                                </td>");
-    // td simples
-    for(int i=1; i<Properties.Length; i++)
-        sb.AppendLine("                                <td>@item." + Properties[i] + "</td>");
-    // td FKs
-    foreach(var fk in foreignKeys)
+
+    // Colunas das propriedades
+    foreach (var p in props)
+        if (p.Name != "Id")
+            sb.AppendLine("                                <td>@item." + p.Name + "</td>");
+
+    // Colunas das FKs
+    foreach (var fk in fks)
         sb.AppendLine("                                <td>@item." + fk.Name + "." + fk.Display + "</td>");
+
     sb.AppendLine("                            </tr>");
-    sb.AppendLine("                        }");
+    sb.AppendLine("                        }}"); // fecha foreach
+
     sb.AppendLine("                    </tbody>");
     sb.AppendLine("                </table>");
     sb.AppendLine("            </div>");
-    sb.AppendLine("        }");
-    sb.AppendLine("        else");
-    sb.AppendLine("        {");
+
+    // Paginação
+    sb.AppendLine("            @if(Model.TotalPages > 1) {{");
+    sb.AppendLine("                <div class=\"modern-card-footer\">");
+    sb.AppendLine("                    <div class=\"modern-pagination d-flex flex-wrap align-items-center gap-1\">");
+    sb.AppendLine("                        <a class=\"modern-btn modern-btn-secondary @(Model.HasPreviousPage ? \"\" : \"disabled\")\" href=\"@(Model.HasPreviousPage ? Url.Action(\"Index\", new { page = Model.CurrentPage - 1 }) : \"#\")\">&laquo; Anterior</a>");
+    sb.AppendLine("                        @foreach(var pageItem in Model.GetPageSeries()) {{");
+    sb.AppendLine("                            if(pageItem is int pageNum) {{");
+    sb.AppendLine("                                <a class=\"modern-btn @(pageNum == Model.CurrentPage ? \"modern-btn-primary\" : \"modern-btn-secondary\")\" href=\"@Url.Action(\"Index\", new { page = pageNum })\">@pageNum</a>");
+    sb.AppendLine("                            }} else {{");
+    sb.AppendLine("                                <span class=\"modern-btn modern-btn-secondary disabled\">…</span>");
+    sb.AppendLine("                            }}");
+    sb.AppendLine("                        }}");
+    sb.AppendLine("                        <a class=\"modern-btn modern-btn-secondary @(Model.HasNextPage ? \"\" : \"disabled\")\" href=\"@(Model.HasNextPage ? Url.Action(\"Index\", new { page = Model.CurrentPage + 1 }) : \"#\")\">Próximo &raquo;</a>");
+    sb.AppendLine("                    </div>");
+    sb.AppendLine("                    <div class=\"text-muted mt-2\">Página @Model.CurrentPage de @Model.TotalPages (@Model.TotalCount registros)</div>");
+    sb.AppendLine("                </div>");
+    sb.AppendLine("            }}");
+
+    sb.AppendLine("        }} else {{"); // else vazio
     sb.AppendLine("            <div class=\"modern-empty-state\">");
     sb.AppendLine("                <i class=\"ph-folder-open\"></i>");
     sb.AppendLine("                <h3>Nenhum registro encontrado</h3>");
     sb.AppendLine("                <p>Comece criando um novo registro</p>");
     sb.AppendLine("            </div>");
-    sb.AppendLine("        }");
+    sb.AppendLine("        }}"); // fecha if/else
+
     sb.AppendLine("    </div>");
-    sb.AppendLine();
-    sb.AppendLine("    @if (Model.Any() && totalPages > 1)");
-    sb.AppendLine("    {");
-    sb.AppendLine("        <div class=\"modern-card-footer\">");
-    sb.AppendLine("            <div class=\"modern-pagination\">");
-    sb.AppendLine("                @for (int i = 1; i <= totalPages; i++)");
-    sb.AppendLine("                {");
-    sb.AppendLine("                    var cls = i == currentPage ? \"modern-btn modern-btn-primary\" : \"modern-btn modern-btn-secondary\";");
-    sb.AppendLine("                    <a href=\"@Url.Action(\"Index\", new { search = search, page = i })\" class=\"@cls\">@i</a>");
-    sb.AppendLine("                }");
-    sb.AppendLine("            </div>");
-    sb.AppendLine("        </div>");
-    sb.AppendLine("    }");
     sb.AppendLine("</div>");
 
-    File.WriteAllText(outputFile, sb.ToString(), Encoding.UTF8);
-    WriteLine("✅ View Index.cshtml gerada em: " + outputFile);
-}
-catch (Exception ex)
-{
-    WriteLine("❌ Erro ao gerar Index.cshtml: " + ex.Message);
+    return sb.ToString();
 }
 #>
